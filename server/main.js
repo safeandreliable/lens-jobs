@@ -1,5 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import NotificationService from './notifications';
+import '/imports/startup/server';
 import Jobs from '../imports/api/jobs';
 
 Jobs.allow({

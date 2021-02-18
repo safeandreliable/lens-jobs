@@ -1,21 +1,25 @@
-import { NotificationService } from '../notifications';
-import { Meteor } from 'meteor/meteor'
+import NotificationService from '../../../../server/notifications';
+import { Meteor } from 'meteor/meteor';
+import {Users} from '../../../api/users';
+import isUndefined from 'lodash/isUndefined';
+import clone from 'lodash/clone';
+import { TAPi18n } from 'meteor/tap:i18n';
 // buffer each user's email text in a queue, then flush them in single email
 Meteor.startup(() => {
   NotificationService.subscribe('email', (userObj, title, description, activities) => {
     console.log('**Email Notification Service Called**');
     activities.forEach(activity => {
       // add quote to make titles easier to read in email text
-      const quoteParams = _.clone(activity.params);
+      const quoteParams = clone(activity.params);
       ['list', 'oldList', 'board', 'comment', 'label', 'card'].forEach(key => {
         if (quoteParams[key]) quoteParams[key] = `"${activity.params[key]}"`; //Removing the quoting of items
       });
 
-      const text = `${activity.params.user} ${TAPi18n.__(activity.description, quoteParams, userObj.getLanguage())}`;
+      const text = `${activity.params.user} ${TAPi18n.__(activity.description, quoteParams, 'en')}`;
       const itemId = activity.params.itemId || 0;
       activity.params.createdAt = new Date();
       //if the user is not set to archived then we can send the email out
-      if (_.isUndefined(userObj.archived) || !userObj.archived) {
+      if (isUndefined(userObj.archived) || !userObj.archived) {
         userObj.addEmailBuffer(itemId, text, activity.params);
       }
     });
